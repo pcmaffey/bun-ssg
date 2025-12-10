@@ -53,7 +53,7 @@ export function PostPage({ meta, children, cover }: PostPageProps) {
             title={meta.title}
             description={meta.subtitle || meta.description || ''}
             image={meta.image}
-            url={`${site.url}/${meta.slug}`}
+            pageUrl={`${site.url}/${meta.slug}`}
         >
             <article className={styles.post}>
                 <header className={headerClass}>

@@ -5,6 +5,7 @@ import matter from 'gray-matter'
 import type { PostMeta } from './types'
 import {  mdxComponents } from '../registry'
 import { getIslandPath, getIslandExport } from './islands'
+import { url } from './utils'
 
 // Directory paths
 export const ROOT_DIR = import.meta.dir.replace('/src/core', '')
@@ -43,8 +44,8 @@ export const importMap = `<script type="importmap">
 // Generate island script/style tags
 export function generateIslandTags(islands: string[]): string {
   if (islands.length === 0) return ''
-  const styles = islands.map(island => `<link rel="stylesheet" href="/islands/${island}.css">`).join('\n')
-  const scripts = islands.map(island => `<script type="module" src="/islands/${island}.js"></script>`).join('\n')
+  const styles = islands.map(island => `<link rel="stylesheet" href="${url(`/islands/${island}.css`)}">`).join('\n')
+  const scripts = islands.map(island => `<script type="module" src="${url(`/islands/${island}.js`)}"></script>`).join('\n')
   return styles + scripts
 }
 
@@ -126,7 +127,7 @@ export async function getPostPath(slug: string): Promise<string> {
 // Load a cover image/component for a post (must be in post folder)
 export async function loadCover(coverPath: string, slug: string): Promise<React.ReactNode | null> {
   const fullPath = `${POSTS_DIR}/${slug}/${coverPath}`
-  const assetUrl = `/${slug}/${coverPath}`
+  const assetUrl = url(`/${slug}/${coverPath}`)
 
   if (coverPath.endsWith('.svg')) {
     const svgContent = await Bun.file(fullPath).text()
@@ -185,8 +186,8 @@ export async function discoverPages(): Promise<string[]> {
 
 // Get the route path for a page name
 export function getPageRoute(name: string): string {
-  if (name === 'index') return '/'
-  if (name === '404') return '/404'
-  return `/${name}`
+  if (name === 'index') return url('/')
+  if (name === '404') return url('/404')
+  return url(`/${name}`)
 }
 
