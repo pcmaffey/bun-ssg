@@ -1,0 +1,2 @@
+preload = ["./src/core/cssLoader.ts", "./src/core/svgRedirect.ts"]
+

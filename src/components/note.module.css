@@ -1,0 +1,54 @@
+.toggle {
+    display: none;
+}
+
+.trigger {
+    text-decoration: underline dashed;
+    text-decoration-thickness: 1px;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.trigger:hover {
+    opacity: 0.7;
+}
+
+.content {
+    display: none;
+    padding: 1rem;
+    margin: 0.5rem 0 1rem;
+    border-radius: var(--border-radius);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-muted);
+    font-size: var(--font-size-s1);
+}
+
+.toggle:checked + .content {
+    display: block;
+}
+
+.content p {
+    margin-bottom: 0.75rem;
+}
+
+.content p:last-child {
+    margin-bottom: 0;
+}
+
+.content ul,
+.content ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    list-style: disc;
+}
+
+.content li {
+    margin-bottom: 0.25rem;
+}
+
+.content a {
+    color: inherit;
+    text-decoration: underline;
+}

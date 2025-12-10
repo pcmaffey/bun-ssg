@@ -1,0 +1,141 @@
+/* =============================================================================
+   CSS Variables
+   ============================================================================= */
+
+:root {
+    /* Colors - Light theme */
+    --color-primary: #22c55e;
+    --color-primary-dark: #16a34a;
+    
+    --color-background: #fafafa;
+    --color-surface: #ffffff;
+    --color-text: #171717;
+    --color-muted: #737373;
+    --color-border: #e5e5e5;
+    
+    /* Typography */
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    
+    --font-size: 1rem;
+    --font-size-s1: 0.875rem;
+    --font-size-s2: 0.75rem;
+    --font-size-l1: 1.125rem;
+    --font-size-l2: 1.25rem;
+    --font-size-l3: 1.5rem;
+    --font-size-l4: 2rem;
+    
+    /* Spacing */
+    --column-width: 42rem;
+    --border-radius: 4px;
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-primary: #4ade80;
+        --color-primary-dark: #22c55e;
+        
+        --color-background: #0a0a0a;
+        --color-surface: #171717;
+        --color-text: #fafafa;
+        --color-muted: #a3a3a3;
+        --color-border: #262626;
+    }
+}
+
+/* =============================================================================
+   Reset
+   ============================================================================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+    min-height: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size);
+    line-height: 1.6;
+    color: var(--color-text);
+    background-color: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+input, button, textarea, select {
+    font: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+}
+
+p {
+    overflow-wrap: break-word;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+code, pre {
+    font-family: var(--font-mono);
+}
+
+/* =============================================================================
+   Typography
+   ============================================================================= */
+
+h1 { font-size: var(--font-size-l4); }
+h2 { font-size: var(--font-size-l3); }
+h3 { font-size: var(--font-size-l2); }
+h4 { font-size: var(--font-size-l1); }
+
+/* =============================================================================
+   Layout Utilities
+   ============================================================================= */
+
+.column {
+    width: 100%;
+    max-width: var(--column-width);
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* =============================================================================
+   Link Styles
+   ============================================================================= */
+
+a {
+    transition: color 150ms ease;
+}
+
+a:hover {
+    color: var(--color-primary);
+}

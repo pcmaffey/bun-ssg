@@ -1,0 +1,37 @@
+.code {
+    padding: 0.2rem 0.4rem;
+    color: var(--color-text);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+}
+
+.code.nowrap {
+    white-space: nowrap;
+}
+
+.codeBlock {
+    display: block;
+    margin: 1rem 0;
+    padding: 1rem;
+    width: 100%;
+    white-space: pre;
+    font-size: var(--font-size-s1);
+    border-radius: var(--border-radius);
+    line-height: 1.5;
+    max-height: 80vh;
+    overflow: auto;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+
+.codeBlock .comment {
+    color: var(--color-muted);
+}
+
+.codeBlock .string {
+    color: var(--color-primary);
+}

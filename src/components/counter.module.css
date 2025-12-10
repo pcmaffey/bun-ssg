@@ -1,0 +1,42 @@
+.counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    background: var(--color-primary);
+    color: var(--color-background);
+    font-size: var(--font-size-l1);
+    cursor: pointer;
+    transition: opacity 150ms ease;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+.button:active {
+    transform: scale(0.95);
+}
+
+.count {
+    min-width: 3rem;
+    text-align: center;
+    font-size: var(--font-size-l1);
+    font-family: var(--font-mono);
+    font-weight: 600;
+}
+
+

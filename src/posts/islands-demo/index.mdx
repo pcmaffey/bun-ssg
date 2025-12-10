@@ -1,0 +1,37 @@
+---
+title: "Interactive Islands"
+slug: "islands-demo"
+subtitle: "Client-side interactivity"
+description: "Learn how to add interactive React components to your static pages using the islands architecture."
+cover: "cover.svg"
+publishedAt: "2025-01-03"
+---
+
+Bun SSG uses an islands architecture for client-side interactivity. Most of your site is static HTML, but you can add interactive React components that hydrate on the client.
+
+## The Counter Example
+
+Here's a simple counter component that demonstrates client-side state:
+
+<Counter />
+
+This counter is fully interactive - click the buttons to increment or decrement the value. The component only loads JavaScript for the parts of the page that need it.
+
+## How Islands Work
+
+1. During the build, island components render as placeholder `<div>` elements with a `data-island` attribute
+2. The build detects which islands are used on each page
+3. Only the necessary JavaScript is bundled and loaded for that page
+4. On the client, the islands hydrate and become interactive
+
+This approach gives you the best of both worlds: fast static pages with targeted interactivity where you need it.
+
+## Creating Your Own Island
+
+To create an island:
+
+1. Create a component in `src/components/` with a default export
+2. Register it in `src/registry.ts` using `defineIslands`
+3. The placeholder is auto-generated and available in MDX
+
+See the Counter component for a complete example of this pattern.
