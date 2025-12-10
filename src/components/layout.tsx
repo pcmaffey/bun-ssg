@@ -35,6 +35,7 @@ export function Layout({
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <title>{fullTitle}</title>
                 <meta name="description" content={description} />
+                <meta name="color-scheme" content="light dark" />
 
                 {/* Open Graph */}
                 <meta property="og:type" content="website" />
@@ -58,7 +59,8 @@ export function Layout({
                 <link rel="alternate" type="application/rss+xml" title={`${site.name} RSS Feed`} href={url('/rss.xml')} />
 
                 {/* Styles */}
-                <link rel="stylesheet" href={url('/styles.css')} />
+                <link rel="preload" href={url('/styles.css')} as="style" />
+
                 {extraStyles && <style dangerouslySetInnerHTML={{ __html: extraStyles }} />}
             </head>
             <body className={cx(s.layout, bodyClass)}>
