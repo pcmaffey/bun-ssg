@@ -13,6 +13,14 @@ async function findCSSModules(): Promise<string[]> {
   return files
 }
 
+// Clean up old css-extract files
+async function cleanupCssExtractFiles(): Promise<void> {
+  const glob = new Bun.Glob('css-extract-*.ts')
+  for await (const file of glob.scan(CACHE_DIR)) {
+    await Bun.file(`${CACHE_DIR}/${file}`).unlink()
+  }
+}
+
 // Bundle CSS modules: writes mappings to .cache/css-modules.json and returns combined CSS
 export async function bundlePageCSS(minify: boolean): Promise<string> {
   const cssModuleFiles = await findCSSModules()
@@ -20,6 +28,9 @@ export async function bundlePageCSS(minify: boolean): Promise<string> {
   let combinedCSS = ''
   
   await Bun.$`mkdir -p ${CACHE_DIR}`.quiet()
+  
+  // Clean up old temporary files before creating new ones
+  await cleanupCssExtractFiles()
   
   for (const cssPath of cssModuleFiles) {
     // Create wrapper that imports and exports the CSS module

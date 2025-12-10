@@ -25,16 +25,16 @@ interface IslandRegistry<T extends IslandConfig> {
  * export const { Counter, Chart } = islands.placeholders
  */
 export function defineIslands<T extends IslandConfig>(config: T): IslandRegistry<T> {
-    const placeholders = {} as IslandRegistry<T>['placeholders']
+    const placeholders: Record<string, () => JSX.Element> = {}
     
     for (const name of Object.keys(config)) {
-        const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1) as Capitalize<string & keyof T>
+        const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1)
         placeholders[capitalizedName] = () => createElement('div', { 'data-island': name })
     }
     
     return {
         paths: config,
-        placeholders,
+        placeholders: placeholders as IslandRegistry<T>['placeholders'],
     }
 }
 

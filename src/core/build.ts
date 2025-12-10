@@ -113,12 +113,27 @@ async function bundleCSS() {
   await writeFile(`${DIST_DIR}/styles.css`, globalCSS + '\n' + modulesCSS)
 }
 
+async function cleanupIslandWrappers() {
+  const currentIslands = new Set(Object.keys(islandPaths))
+  const glob = new Bun.Glob('*-wrapper.tsx')
+  for await (const file of glob.scan(CACHE_DIR)) {
+    const islandName = file.replace('-wrapper.tsx', '')
+    if (!currentIslands.has(islandName)) {
+      await Bun.file(`${CACHE_DIR}/${file}`).unlink()
+    }
+  }
+}
+
 async function bundleIslands(extraDeps: string[]) {
   const externals = getExternalModules(extraDeps)
   
+  await Bun.$`mkdir -p ${CACHE_DIR}`.quiet()
+  
+  // Clean up stale island wrappers from removed islands
+  await cleanupIslandWrappers()
+  
   // Bundle individual islands from registry with auto-generated hydration wrappers
   for (const [name, componentPath] of Object.entries(islandPaths) as [string, string][]) {
-    await Bun.$`mkdir -p ${CACHE_DIR}`.quiet()
     const wrapperCode = generateHydrationWrapper(name, componentPath)
     const wrapperPath = `${CACHE_DIR}/${name}-wrapper.tsx`
     await Bun.write(wrapperPath, wrapperCode)

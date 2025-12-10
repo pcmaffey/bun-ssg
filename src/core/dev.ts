@@ -25,7 +25,21 @@ import {
 } from './shared'
 import { islandPaths } from '../registry'
 
+// Clean up stale island wrappers from removed islands
+async function cleanupIslandWrappers() {
+  const currentIslands = new Set(Object.keys(islandPaths))
+  const glob = new Bun.Glob('*-wrapper.tsx')
+  await Bun.$`mkdir -p ${CACHE_DIR}`.quiet()
+  for await (const file of glob.scan(CACHE_DIR)) {
+    const islandName = file.replace('-wrapper.tsx', '')
+    if (!currentIslands.has(islandName)) {
+      await Bun.file(`${CACHE_DIR}/${file}`).unlink()
+    }
+  }
+}
+
 // Detect island dependencies at startup
+await cleanupIslandWrappers()
 const islandDeps = await detectIslandDeps(islandPaths)
 const importMap = generateImportMap(islandDeps)
 const externalModules = getExternalModules(islandDeps)

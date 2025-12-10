@@ -16,10 +16,23 @@ export async function transformSVGs() {
     
     const svg = await Bun.file(svgPath).text()
     const code = await transform(svg, {
-      plugins: ['@svgr/plugin-jsx'],
+      plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
       jsxRuntime: 'automatic',
       exportType: 'default',
       typescript: true,
+      svgoConfig: {
+        plugins: [
+          {
+            name: 'preset-default',
+            params: {
+              overrides: {
+                // Keep viewBox for proper scaling
+                removeViewBox: false,
+              },
+            },
+          },
+        ],
+      },
     })
     
     await Bun.write(tsxPath, code)
