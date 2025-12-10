@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#f0fdf4"/>
+  <circle cx="200" cy="150" r="80" fill="#22c55e" opacity="0.2"/>
+  <circle cx="200" cy="150" r="50" fill="#22c55e" opacity="0.4"/>
+  <circle cx="200" cy="150" r="20" fill="#22c55e"/>
+  <path d="M120 150h160M200 70v160" stroke="#166534" stroke-width="2" stroke-dasharray="8 4"/>
+  <text x="200" y="260" text-anchor="middle" fill="#166534" font-family="system-ui" font-size="14">Interactive Islands</text>
+</svg>
+
+
