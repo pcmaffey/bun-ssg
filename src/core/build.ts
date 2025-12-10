@@ -19,9 +19,11 @@ const {
   STYLES_DIR,
   CACHE_DIR,
   detectIslands,
-  importMap,
+  generateImportMap,
   generateIslandTags,
   generateHydrationWrapper,
+  detectIslandDeps,
+  getExternalModules,
   loadPosts,
   loadCover,
   getPostPath,
@@ -42,6 +44,12 @@ async function build() {
   await Bun.$`rm -rf ${DIST_DIR}`.quiet()
   await Bun.$`mkdir -p ${DIST_DIR}`.quiet()
 
+  // Detect island dependencies for import map and externals
+  const islandDeps = await detectIslandDeps(islandPaths)
+  if (islandDeps.length > 0) {
+    console.log(`Detected island dependencies: ${islandDeps.join(', ')}`)
+  }
+
   // Copy public assets
   console.log('Copying public assets...')
   await Bun.$`cp -r ${PUBLIC_DIR}/* ${DIST_DIR}/`.quiet()
@@ -52,7 +60,7 @@ async function build() {
 
   // Bundle islands (interactive components)
   console.log('Bundling islands...')
-  await bundleIslands()
+  await bundleIslands(islandDeps)
 
   // Load and process posts
   console.log('Processing MDX posts...')
@@ -67,7 +75,7 @@ async function build() {
       : name === '404' ? `${DIST_DIR}/404.html`
       : `${DIST_DIR}/${name}/index.html`
     
-    await writeHtml(outputPath, createElement(Page, { posts }))
+    await writeHtml(outputPath, createElement(Page, { posts }), islandDeps)
     console.log(`  Built: ${name}`)
   }
 
@@ -78,7 +86,7 @@ async function build() {
     const content = await renderPost(post)
     const cover = post.cover ? await loadCover(post.cover, post.slug) : null
     const element = createElement(PostPage, { meta: post, children: content, cover })
-    await writeHtml(`${DIST_DIR}/${post.slug}/index.html`, element)
+    await writeHtml(`${DIST_DIR}/${post.slug}/index.html`, element, islandDeps)
     
     // Copy post folder assets (if folder-based post)
     const postFolder = `${POSTS_DIR}/${post.slug}`
@@ -105,7 +113,9 @@ async function bundleCSS() {
   await writeFile(`${DIST_DIR}/styles.css`, globalCSS + '\n' + modulesCSS)
 }
 
-async function bundleIslands() {
+async function bundleIslands(extraDeps: string[]) {
+  const externals = getExternalModules(extraDeps)
+  
   // Bundle individual islands from registry with auto-generated hydration wrappers
   for (const [name, componentPath] of Object.entries(islandPaths) as [string, string][]) {
     await Bun.$`mkdir -p ${CACHE_DIR}`.quiet()
@@ -120,7 +130,7 @@ async function bundleIslands() {
       minify: true,
       target: 'browser',
       format: 'esm',
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+      external: externals
     })
 
     console.log(`Island ${name}: success=${result.success}, outputs=${result.outputs.length}`)
@@ -168,12 +178,13 @@ function generateRSS(posts: PostMeta[]): string {
 </rss>`
 }
 
-async function writeHtml(path: string, element: React.ReactElement) {
+async function writeHtml(path: string, element: React.ReactElement, extraDeps: string[]) {
   const markup = renderToStaticMarkup(element)
   const islands = detectIslands(markup)
   const islandTags = generateIslandTags(islands)
   let html = '<!DOCTYPE html>' + markup
   if (islands.length > 0) {
+    const importMap = generateImportMap(extraDeps)
     html = html.replace('</head>', importMap + '</head>')
     html = html.replace('</body>', islandTags + '</body>')
   }

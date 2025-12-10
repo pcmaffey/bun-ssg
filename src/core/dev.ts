@@ -9,9 +9,11 @@ import {
   STYLES_DIR,
   CACHE_DIR,
   detectIslands,
-  importMap,
+  generateImportMap,
   generateIslandTags,
   generateHydrationWrapper,
+  detectIslandDeps,
+  getExternalModules,
   loadPosts,
   loadCover,
   getPostPath,
@@ -22,6 +24,11 @@ import {
   getPageRoute,
 } from './shared'
 import { islandPaths } from '../registry'
+
+// Detect island dependencies at startup
+const islandDeps = await detectIslandDeps(islandPaths)
+const importMap = generateImportMap(islandDeps)
+const externalModules = getExternalModules(islandDeps)
 
 const PORT = 3100
 
@@ -222,7 +229,7 @@ const server = serve({
           define: {
             'process.env.NODE_ENV': '"development"'
           },
-          external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime']
+          external: externalModules
         })
         
         if (result.success) {

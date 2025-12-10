@@ -9,6 +9,18 @@ import { url } from './utils'
 
 // Directory paths
 export const ROOT_DIR = import.meta.dir.replace('/src/core', '')
+
+// Read package.json for dependency versions
+const pkg = await Bun.file(`${ROOT_DIR}/package.json`).json() as {
+  dependencies?: Record<string, string>
+}
+
+function getVersion(name: string): string {
+  const version = pkg.dependencies?.[name]
+  if (!version) throw new Error(`Missing dependency: ${name}`)
+  // Strip version prefix (^, ~, etc)
+  return version.replace(/^[\^~]/, '')
+}
 export const POSTS_DIR = `${ROOT_DIR}/src/posts`
 export const PUBLIC_DIR = `${ROOT_DIR}/public`
 export const STYLES_DIR = `${ROOT_DIR}/src/styles`
@@ -28,18 +40,82 @@ export function detectIslands(html: string): string[] {
   return islands
 }
 
-// Import map using esm.sh CDN for React
-export const importMap = `<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18",
-    "react/jsx-runtime": "https://esm.sh/react@18/jsx-runtime",
-    "react/jsx-dev-runtime": "https://esm.sh/react@18/jsx-dev-runtime",
-    "react-dom": "https://esm.sh/react-dom@18",
-    "react-dom/client": "https://esm.sh/react-dom@18/client"
-  }
+// CDN dependencies that are always externalized (shared across all islands)
+const cdnDeps: Record<string, string[]> = {
+  react: ['', '/jsx-runtime', '/jsx-dev-runtime'],
+  'react-dom': ['', '/client'],
 }
+
+// Build import map from package.json versions
+function buildImportMap(extraDeps: string[] = []): Record<string, string> {
+  const imports: Record<string, string> = {}
+  
+  for (const [name, subpaths] of Object.entries(cdnDeps)) {
+    const version = getVersion(name)
+    for (const subpath of subpaths) {
+      const key = name + subpath
+      imports[key] = `https://esm.sh/${name}@${version}${subpath}`
+    }
+  }
+  
+  // Add extra dependencies (detected from islands)
+  for (const dep of extraDeps) {
+    if (imports[dep]) continue
+    const version = getVersion(dep)
+    imports[dep] = `https://esm.sh/${dep}@${version}`
+  }
+  
+  return imports
+}
+
+// Get all external module names for bundler config
+export function getExternalModules(extraDeps: string[] = []): string[] {
+  const externals: string[] = []
+  for (const [name, subpaths] of Object.entries(cdnDeps)) {
+    for (const subpath of subpaths) {
+      externals.push(name + subpath)
+    }
+  }
+  return [...externals, ...extraDeps]
+}
+
+// Generate import map script tag
+export function generateImportMap(extraDeps: string[] = []): string {
+  const imports = buildImportMap(extraDeps)
+  return `<script type="importmap">
+${JSON.stringify({ imports }, null, 2)}
 </script>`
+}
+
+// Default import map (React only, for backwards compatibility)
+export const importMap = generateImportMap()
+
+// Detect external dependencies from island source files
+export async function detectIslandDeps(islandPaths: Record<string, string | [string, string]>): Promise<string[]> {
+  const deps = new Set<string>()
+  const importRegex = /(?:import|from)\s+['"]([^'"./][^'"]*)['"]/g
+  
+  for (const entry of Object.values(islandPaths)) {
+    const filePath = Array.isArray(entry) ? entry[0] : entry
+    const fullPath = `${ROOT_DIR}/src/${filePath}`
+    const source = await Bun.file(fullPath).text()
+    
+    let match
+    while ((match = importRegex.exec(source)) !== null) {
+      const dep = match[1]
+      // Skip React (already in cdnDeps) and node builtins
+      if (dep.startsWith('react') || dep.startsWith('node:')) continue
+      // Get base package name (handle scoped packages)
+      const baseName = dep.startsWith('@') 
+        ? dep.split('/').slice(0, 2).join('/')
+        : dep.split('/')[0]
+      deps.add(baseName)
+    }
+  }
+  
+  // Filter to only deps that exist in package.json
+  return [...deps].filter(dep => pkg.dependencies?.[dep])
+}
 
 // Generate island script/style tags
 export function generateIslandTags(islands: string[]): string {
