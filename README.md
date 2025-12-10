@@ -1,16 +1,18 @@
 # Bun SSG
 
-A fast, minimal static site generator built with Bun and React. Features MDX support and an islands architecture for selective client-side interactivity.
+A fast, minimal static site generator built with Bun and React islands. Features MDX support and an islands architecture for selective client-side interactivity. Outputs ~10KB of HTML+CSS, with no javascript dependencies loaded until needed.
 
 ## Features
 
-- Fast builds with Bun
-- MDX for content with JSX components
-- CSS modules for scoped styling
+- Fast minimal builds
+- Automatic page routing and RSS feed generation
+- MDX for markdown content with JSX components
 - Islands architecture for interactive components
-- Automatic RSS feed generation
+- CSS modules for scoped styling
+- Import SVGs as React components
 - Hot-module reload
 - TypeScript throughout
+- No client-side routing
 
 ## Quick Start
 
@@ -52,9 +54,15 @@ Edit `src/config.ts` to customize your site:
 export const site = {
   name: 'My Site',
   url: 'https://example.com',
+  basePath: '/my-repo', // For GitHub Pages or subdirectory hosting (leave empty for root)
   description: 'My site description',
   author: 'Your Name',
   email: 'hello@example.com',
+}
+
+export const rss = {
+  title: site.name,
+  description: site.description,
 }
 ```
 
@@ -89,9 +97,6 @@ Required fields: `title`, `slug`, `publishedAt`
 Built-in components are available in MDX:
 
 ```mdx
-<Section>
-Content wrapped in a centered section.
-</Section>
 
 <Note id="my-note">Clickable note trigger</Note>
 <NoteContent id="my-note">
@@ -190,6 +195,7 @@ Customize the theme in `src/styles/global.css`:
 
 ```css
 :root {
+  /* Colors */
   --color-primary: #22c55e;
   --color-background: #fafafa;
   --color-surface: #ffffff;
@@ -197,8 +203,13 @@ Customize the theme in `src/styles/global.css`:
   --color-muted: #737373;
   --color-border: #e5e5e5;
   
+  /* Typography */
   --font-sans: system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
+  
+  /* Layout */
+  --column-width: 42rem;
+  --border-radius: 4px;
 }
 ```
 
@@ -246,6 +257,21 @@ bun run dev
 ```
 
 The dev server watches for changes and rebuilds automatically.
+
+### Hot Module Reload
+
+The dev server uses a two-process architecture:
+
+1. **`dev-runner.ts`** watches `src/` for file changes
+2. **`dev.ts`** serves content and maintains SSE connections with browsers
+
+When files change:
+
+- **TypeScript/TSX** → Full server restart (Bun caches modules)
+- **MDX/CSS** → Browser reload only (faster, no restart needed)
+- **SVG** → Regenerate TSX wrappers, then restart
+
+The browser connects via Server-Sent Events (`/__dev__`) and reloads when notified. If the server restarts, the browser automatically reconnects and reloads once it's ready.
 
 ## Deployment
 
