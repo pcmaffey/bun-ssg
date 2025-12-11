@@ -160,31 +160,39 @@ export async function loadPosts(): Promise<PostMeta[]> {
   // Load folder-based posts (slug/index.mdx)
   const folderGlob = new Bun.Glob('*/index.mdx')
   for await (const file of folderGlob.scan(POSTS_DIR)) {
+    const slug = file.replace('/index.mdx', '')
     const content = await Bun.file(`${POSTS_DIR}/${file}`).text()
     const { data } = matter(content)
-    posts.push(extractPostMeta(data))
+    posts.push(extractPostMeta(data, slug))
   }
 
   // Load standalone posts (*.mdx, excluding index.mdx in folders)
   const standaloneGlob = new Bun.Glob('*.mdx')
   for await (const file of standaloneGlob.scan(POSTS_DIR)) {
     if (file.includes('/')) continue
+    const slug = file.replace('.mdx', '')
     const content = await Bun.file(`${POSTS_DIR}/${file}`).text()
     const { data } = matter(content)
-    posts.push(extractPostMeta(data))
+    posts.push(extractPostMeta(data, slug))
   }
 
   posts.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   return posts
 }
 
-function extractPostMeta(data: Record<string, unknown>): PostMeta {
+function extractPostMeta(data: Record<string, unknown>, slug: string): PostMeta {
+  // Resolve relative image paths to post folder
+  const rawImage = data.image as string | undefined
+  const image = rawImage && !rawImage.startsWith('/') && !rawImage.startsWith('http')
+    ? `/${slug}/${rawImage}`
+    : rawImage
+
   return {
     title: data.title as string,
-    slug: data.slug as string,
+    slug,
     subtitle: data.subtitle as string | undefined,
     description: data.description as string | undefined,
-    image: data.image as string | undefined,
+    image,
     cover: data.cover as string | undefined,
     publishedAt: data.publishedAt as string,
     updatedAt: data.updatedAt as string | undefined,
