@@ -10,7 +10,7 @@ A fast, minimal static site generator built with Bun and React islands. Features
 - Islands architecture for interactive components
 - CSS modules for scoped styling
 - Import SVGs as React components
-- Hot-module reload
+- Hot reloading
 - TypeScript throughout
 - No client-side routing
 
@@ -258,7 +258,7 @@ bun run dev
 
 The dev server watches for changes and rebuilds automatically.
 
-### Hot Module Reload
+### Hot Reloading
 
 The dev server uses a two-process architecture:
 
